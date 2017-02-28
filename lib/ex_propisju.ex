@@ -306,57 +306,59 @@ defmodule ExPropisju do
   def rublej(amount, locale \\ :ru, options \\ %{}) do
     integrals_key = :rub_integral
     fractions_key = :rub_fraction
-    money_gender = ExPropisju.money_gender[:rub]
+    money_gender = ExPropisju.money_genders[:rub]
 
     money(amount, locale, integrals_key, fractions_key, money_gender, true, false, options)
   end
 
-	def money(amount, locale, integrals_key, fractions_key, money_gender, fraction_as_number = false, integrals_as_number = false, options = {}) do
+	def money(amount, locale, integrals_key, fractions_key, money_gender, fraction_as_number \\ false, integrals_as_number \\ false, options \\ {}) do
 
     # options[:integrals_formatter] ||= '%d'
     # options[:fraction_formatter] ||= '%d'
     # options[:integrals_delimiter] ||= ''
     # options[:always_show_fraction] ||= false
 
-    # locale_data = pick_locale(TRANSLATIONS, locale)
-    # integrals = locale_data[integrals_key]
-    # fractions = locale_data[fractions_key]
+    locale_data = pick_locale(ExPropisju.translations, Atom.to_string(locale))
+    integrals = locale_data[integrals_key]
+    fractions = locale_data[fractions_key]
 
-    # return zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number, options) if amount.zero?
+    if zero?(amount) do
+      zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number, options)
+    else
+      parts = []
 
-    # parts = []
-
-    # unless amount.to_i == 0
-    #   if integrals_as_number
-    #     parts << format_integral(amount.to_i, options) << choose_plural(amount.to_i, integrals)
-    #   else
-        parts << propisju_int(amount.to_i, money_gender, integrals, locale)
-      # end
-    # end
-
-    # if amount.kind_of?(Float) || amount.kind_of?(BigDecimal)
-      # remainder = (amount.divmod(1)[1]*100).round
-      # if remainder == 100
-      #   parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
-      #   parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
-      # else
-      #   if fraction_as_number
-      #     kop = remainder.to_i
-      #     if (!kop.zero? || options[:always_show_fraction])
-      #       parts << format(options[:fraction_formatter], kop) << choose_plural(kop, fractions)
-      #     end
+      # unless amount.to_i == 0
+      #   if integrals_as_number
+      #     parts << format_integral(amount.to_i, options) << choose_plural(amount.to_i, integrals)
       #   else
-      #     parts << propisju_int(remainder.to_i, money_gender, fractions, locale)
-      #   end
+          parts = parts ++ propisju_int(amount, money_gender, integrals, locale)
+        # end
       # end
-    # else
-      # parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
-    # end
 
-    # parts.join(' ')
+      # if amount.kind_of?(Float) || amount.kind_of?(BigDecimal)
+        # remainder = (amount.divmod(1)[1]*100).round
+        # if remainder == 100
+        #   parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
+        #   parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
+        # else
+        #   if fraction_as_number
+        #     kop = remainder.to_i
+        #     if (!kop.zero? || options[:always_show_fraction])
+        #       parts << format(options[:fraction_formatter], kop) << choose_plural(kop, fractions)
+        #     end
+        #   else
+        #     parts << propisju_int(remainder.to_i, money_gender, fractions, locale)
+        #   end
+        # end
+      # else
+        # parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
+      # end
+
+      Enum.join(parts, " ")
+    end
   end
 
-    # Выполняет преобразование числа из цифрого вида в символьное
+  # Выполняет преобразование числа из цифрого вида в символьное
   #
   #   amount - числительное
   #   gender   = 1 - мужской, = 2 - женский, = 3 - средний
@@ -366,39 +368,41 @@ defmodule ExPropisju do
   #
   # Примерно так:
   #   propisju(42, 1, ["сволочь", "сволочи", "сволочей"]) # => "сорок две сволочи"
-  def propisju_int(amount, gender = 1, item_forms = [], locale = :ru) do
+  def propisju_int(amount, gender \\ 1, item_forms \\ [], locale \\ :ru) do
 
-    # locale_root = pick_locale(TRANSLATIONS, locale)
+    locale_root = pick_locale(ExPropisju.translations, Atom.to_string(locale))
 
     # # zero!
-    # if amount.zero?
-    #   return [locale_root['0'], item_forms[-1]].compact.join(' ')
-    # end
+    if zero?(amount) do
+      [locale_root['0'], item_forms[-1]] |> Enum.join(' ')
+    end
 
-    # fractions = [
-    #   [:trillions, 1_000_000_000_000],
-    #   [:billions, 1_000_000_000],
-    #   [:millions, 1_000_000],
-    #   [:thousands, 1_000],
-    # ]
+    fractions = [
+      [:trillions, 1_000_000_000_000],
+      [:billions, 1_000_000_000],
+      [:millions, 1_000_000],
+      [:thousands, 1_000]
+    ]
 
-    # parts = fractions.map do | name, multiplier |
-    #   [name, fraction = (amount / multiplier) % 1000]
-    # end
+    parts = Enum.map(fractions, fn([name | multiplier]) ->
+      [name, fraction = div(amount, multiplier |> List.last) |> rem(1000)]
+    end)
 
     # # Единицы обрабатываем отдельно
-    # ones = amount % 1000
+    ones = rem(amount, 1000)
 
-    # # Составляем простые тысячные доли
-    # parts_in_writing = parts.reject do | part |
-    #   part[1].zero?
-    # end.map do | name, fraction |
-    #   thousandth_gender = (name == :thousands) ? 2 : 1
-      compose_ordinal(fraction, thousandth_gender, locale_root[name], locale)
-    # end
+    # Составляем простые тысячные доли
+    parts_in_writing = Enum.reject(parts, fn(part) ->
+        zero?(part |> List.last)
+      end)
+    |> Enum.map(fn([name, fraction]) ->
+        thousandth_gender = if (name == :thousands), do: 2, else: 1
+        compose_ordinal(fraction, thousandth_gender, locale_root[name], locale)
+      # [compose_ordinal(Integer.to_string(amount), 1, ["рубль", "рубля", "рублей"], :ru)]
+      end)
 
-    # # И только единицы обрабатываем с переданными параметрами
-    # parts_in_writing.push(compose_ordinal(ones, gender, item_forms, locale))
+    # И только единицы обрабатываем с переданными параметрами
+    parts_in_writing = parts_in_writing ++ [(compose_ordinal(ones, gender, item_forms, locale))]
 
     # parts_in_writing.compact.join(' ')
   end
@@ -408,7 +412,8 @@ defmodule ExPropisju do
     # ExPropisju.compose_ordinal("123", 1, ["рубль", "рубля", "рублей"], :ru)
   def compose_ordinal(remaining_amount_or_nil, gender, item_forms \\ [], locale \\ :ru) do
 
-    {remaining_amount, _} = Integer.parse(remaining_amount_or_nil)
+    # {remaining_amount, _} = Integer.parse(remaining_amount_or_nil)
+    remaining_amount = remaining_amount_or_nil
 
     locale = Atom.to_string(locale)
 
@@ -470,6 +475,14 @@ defmodule ExPropisju do
 
   def zero?(0), do: true
   def zero?(x) when is_integer(x), do: false
+
+  def zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number, options) do
+    integ = if integrals_as_number, do: "0", else: locale_data['0']
+    frac = if fraction_as_number, do: "0", else: locale_data['0']
+    [integ , List.last(integrals), frac, List.last(fractions)]
+    |> Enum.join(" ")
+  end
+
 
   def pick_locale(from_hash, locale) do
     if Map.has_key?(from_hash, locale) do
