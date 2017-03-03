@@ -436,7 +436,7 @@ defmodule ExPropisju do
     ]
 
     parts = Enum.map(fractions, fn([name | multiplier]) ->
-      [name, fraction = div(amount, multiplier |> List.last) |> rem(1000)]
+      [name, _fraction = div(amount, multiplier |> List.last) |> rem(1000)]
     end)
 
     # # Единицы обрабатываем отдельно
@@ -452,7 +452,7 @@ defmodule ExPropisju do
     end)
 
     # И только единицы обрабатываем с переданными параметрами
-    parts_in_writing = parts_in_writing ++ [(compose_ordinal(ones, gender, item_forms, locale))]
+    parts_in_writing ++ [(compose_ordinal(ones, gender, item_forms, locale))]
 
   end
 
@@ -469,10 +469,10 @@ defmodule ExPropisju do
     # Ноль чего-то
     # return "ноль %s" % item_forms[3] if remaining_amount_or_nil.zero?
 
-    [rest, rest1, chosen_ordinal, ones, tens, hundreds] = Enum.map(1..6, fn(x) -> nil end)
+    [_rest, _rest1, _chosen_ordinal, _ones, _tens, _hundreds] = Enum.map(1..6, fn(_x) -> nil end)
 
     rest = rem(remaining_amount, 1000)
-    remaining_amount = remaining_amount / 1000
+    # remaining_amount / 1000
     if zero?(rest) do
       # последние три знака нулевые
       Enum.at(item_forms, 2)
@@ -506,6 +506,7 @@ defmodule ExPropisju do
         x when x in 2..4 ->
           chosen_ordinal = 1 # индекс формы меняется
         _ ->
+          chosen_ordinal
       end
     end
 
@@ -525,7 +526,7 @@ defmodule ExPropisju do
   def zero?(0), do: true
   def zero?(x) when is_integer(x), do: false
 
-  def zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number, options) do
+  def zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number, _options) do
     integ = if integrals_as_number, do: "0", else: locale_data['0']
     frac = if fraction_as_number, do: "0", else: locale_data['0']
     [integ , List.last(integrals), frac, List.last(fractions)]
@@ -537,7 +538,7 @@ defmodule ExPropisju do
     if Map.has_key?(from_hash, locale) do
       from_hash[locale]
     else
-      raise UnknownLocale, message: "Unknown locale #{locale}"
+      raise ArgumentError, message: "Unknown locale #{locale}"
     end
   end
 
