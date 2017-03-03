@@ -1,6 +1,12 @@
 defmodule ExPropisju do
   @moduledoc """
   Documentation for ExPropisju.
+  ## Examples
+
+      iex> ExPropisju.rublej(123)
+      "сто двадцать три рубля"
+      iex> ExPropisju.propisju_shtuk(100, 1, ["процент", "процентов", "процентов"])
+      "сто процентов"
   """
 
   @translations %{

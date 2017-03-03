@@ -10,6 +10,21 @@ defmodule ExPropisju.Mixfile do
      deps: deps()]
   end
 
+  defp description do
+    """
+    Copypast gem ru_propisju to elixir
+    """
+  end
+
+  defp package do
+    [
+     files: ["lib", "mix.exs", "README.md"],
+     maintainers: ["Sergey Chechaev"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/sergey-chechaev/ex_propisju",
+              "Docs" => "https://github.com/sergey-chechaev/ex_propisju"}
+     ]
+  end
   # Configuration for the OTP application
   #
   # Type "mix help compile.app" for more information
@@ -28,6 +43,7 @@ defmodule ExPropisju.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:ex_doc, "~> 0.14", only: :dev},
+     {:earmark, "~> 1.1", only: :dev}]
   end
 end
