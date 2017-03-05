@@ -322,13 +322,7 @@ defmodule ExPropisju do
   #    RuPropisju.propisju_shtuk(21, 3, "колесо", "колеса", "колес") #=> "двадцать одно колесо"
   #    RuPropisju.propisju_shtuk(21, 1, "мужик", "мужика", "мужиков") #=> "двадцать один мужик"
   def propisju_shtuk(items, gender, forms, locale \\ :ru) do
-    # if (items == items.to_i)
-      [propisju(items, gender, locale), choose_plural(items, forms)] |> List.flatten |> Enum.join(" ")
-    # else
-    #   [propisju(items, gender, locale), forms[1]]
-    # end
-
-    # elements.join(" ")
+    [propisju(items, gender, locale), choose_plural(items, forms)] |> List.flatten |> Enum.join(" ")
   end
 
   # Выбирает корректный вариант числительного в зависимости от рода и числа и оформляет сумму прописью
@@ -336,11 +330,7 @@ defmodule ExPropisju do
   #   propisju(243, 1) => "двести сорок три"
   #   propisju(221, 2) => "двести двадцать одна"
   def propisju(amount, gender, locale \\ :ru) do
-    if is_integer amount do
-      propisju_int(amount, gender, [], locale)
-    else # также сработает для Decimal, дробные десятичные числительные в долях поэтому женского рода
-      # propisju_float(amount, locale)
-    end
+    propisju_int(amount, gender, [], locale)
   end
 
   # Выбирает нужный падеж существительного в зависимости от числа
@@ -364,11 +354,6 @@ defmodule ExPropisju do
 
 	def money(amount, locale, integrals_key, fractions_key, money_gender, fraction_as_number \\ false, integrals_as_number \\ false, options \\ {}) do
 
-    # options[:integrals_formatter] ||= '%d'
-    # options[:fraction_formatter] ||= '%d'
-    # options[:integrals_delimiter] ||= ''
-    # options[:always_show_fraction] ||= false
-
     locale_data = pick_locale(ExPropisju.translations, Atom.to_string(locale))
     integrals = locale_data[integrals_key]
     fractions = locale_data[fractions_key]
@@ -378,32 +363,7 @@ defmodule ExPropisju do
     else
       parts = []
 
-      # unless amount.to_i == 0
-      #   if integrals_as_number
-      #     parts << format_integral(amount.to_i, options) << choose_plural(amount.to_i, integrals)
-      #   else
-          parts = parts ++ propisju_int(amount, money_gender, integrals, locale)
-        # end
-      # end
-
-      # if amount.kind_of?(Float) || amount.kind_of?(BigDecimal)
-        # remainder = (amount.divmod(1)[1]*100).round
-        # if remainder == 100
-        #   parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
-        #   parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
-        # else
-        #   if fraction_as_number
-        #     kop = remainder.to_i
-        #     if (!kop.zero? || options[:always_show_fraction])
-        #       parts << format(options[:fraction_formatter], kop) << choose_plural(kop, fractions)
-        #     end
-        #   else
-        #     parts << propisju_int(remainder.to_i, money_gender, fractions, locale)
-        #   end
-        # end
-      # else
-        # parts << zero_fraction(locale, money_gender, fractions, fraction_as_number, options) if options[:always_show_fraction]
-      # end
+      parts = parts ++ propisju_int(amount, money_gender, integrals, locale)
 
       Enum.join(parts, " ")
     end
@@ -499,7 +459,7 @@ defmodule ExPropisju do
       value = locale_root[rem(rest, 10)]
       # если попался хэш, делаем выбор согласно рода
       if is_map(value), do: value = value[gender]
-      ones = value
+
       case rem(rest, 10) do
         1 ->
           chosen_ordinal = 0 # индекс формы меняется
@@ -513,7 +473,7 @@ defmodule ExPropisju do
     plural = [
       hundreds,
       tens,
-      ones,
+      value || ones,
       Enum.at(item_forms, chosen_ordinal),
     ]
     |> Enum.reject(fn(x) -> x == ""end)
