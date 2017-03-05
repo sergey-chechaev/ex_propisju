@@ -1,4 +1,4 @@
-# ExPropisju
+# ExPropisju [![Build Status](https://travis-ci.org/sergey-chechaev/ex_propisju.svg?branch=master)](https://travis-ci.org/sergey-chechaev/ex_propisju)
 Копипаст кода гема Ruby https://github.com/julik/ru_propisju на elixir.
 Выводит сумму прописью, рублей и гривен. Помогает в выборе правильного числительного.
 
