@@ -10,6 +10,8 @@
   "двести двенадцать сволочей"
   iex(3)> ExPropisju.propisju_shtuk(100, 1, ["процент", "процентов", "процентов"])
   "сто процентов"
+  iex(3)> ExPropisju.propisju(1000)
+  "одна тысяча"
 ```
 
 ## Installation
