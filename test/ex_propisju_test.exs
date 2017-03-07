@@ -23,5 +23,6 @@ defmodule ExPropisjuTest do
 
   test ".propisju" do
     assert "сто двадцать три" == ExPropisju.propisju(123)
+    assert "одна тысяча" == ExPropisju.propisju(1000)
   end
 end

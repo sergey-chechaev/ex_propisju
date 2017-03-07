@@ -330,7 +330,8 @@ defmodule ExPropisju do
   #   propisju(243, 1) => "двести сорок три"
   #   propisju(221, 2) => "двести двадцать одна"
   def propisju(amount) do
-    propisju_int(amount, 1, [], :ru) |> Enum.join(" ")
+    require IEx; IEx.pry
+    propisju_int(amount, 1, [], :ru) |> List.flatten |> Enum.join("")
   end
   def propisju(amount, gender, locale \\ :ru) do
     propisju_int(amount, gender, [], locale)
