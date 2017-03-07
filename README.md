@@ -21,7 +21,7 @@ by adding `ex_propisju` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ex_propisju, "~> 0.1.2"}]
+  [{:ex_propisju, "~> 0.1.4"}]
 end
 ```
 
